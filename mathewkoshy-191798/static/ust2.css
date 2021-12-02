@@ -1,0 +1,32 @@
+body{
+    background-image:url(bg2.jpg);
+    
+    background-size: cover;
+    font-family: sans-serif;
+    
+}
+.header{
+    float: left;
+    padding-top: 0ch;
+}
+.entry{
+    width: 800px;
+    background-color:rgba(0, 0, 0, 0.7);
+    margin: auto;
+    color:white;
+    padding: 10px 0px 10px 0px;
+    text-align: center;
+    border-radius: 15px 15px 0px 0px;
+}
+.detail{
+    width: 800px;
+    margin: auto;
+}
+.diya{
+  border-radius: 50%;
+}
+marquee{
+    font:bold;
+    color:red;
+    background-color:yellow;
+}
