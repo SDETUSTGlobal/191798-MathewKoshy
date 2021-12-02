@@ -1,0 +1,479 @@
+
+<!doctype html>
+
+<html>
+	<head>
+		<title>Floor Plan Creator</title>
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+		<meta name="google-signin-client_id" content="753409056956-cqpaqpjjnm5hso9e2hnjk1ikl1rtls0p.apps.googleusercontent.com">
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1, user-scalable=0" />
+		<link rel="shortcut icon" href="/img/favicon.ico"/>
+		<link rel="stylesheet" href="/css/w3.css">
+		<script type="text/javascript">var s='d';var i='0';var v=0;var su=0;var m=''; var mt='*'; var c=''; var sa='1';</script>
+		<script type="text/javascript" src="/js/fpc/fpc.nocache.js"></script>
+		<script type="text/javascript" src="/js/jszip.min.js" defer="defer"></script>
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+			ga('create', 'UA-38892036-2', 'floorplancreator.net');
+			ga('set', 'anonymizeIp', true);
+			ga('send', 'pageview');
+		</script>
+		<style>
+			@page {
+				size: A4 landscape;
+				margin: 0;
+			}
+
+			@media print {
+				#ui {display: none !important}
+								canvas {
+					display: none !important;
+				}
+							}
+
+			@media screen {div#printinfo {display: none}}
+
+			body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
+			html, body {
+				height: 100%;
+				overscroll-behavior-x: none;
+			}
+
+			.logo {
+				background-image: url(/img/iconlogo.png);
+				background-repeat: no-repeat;
+				background-size: contain;
+				padding-left: 20px !important;
+			}
+
+			div {
+				margin: 0;
+				padding: 0;
+			}
+
+			td {
+				padding: 0;
+			}
+
+			.canvas {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+				display: block;
+				overflow: none;
+			}
+
+			canvas {
+				touch-action: none;
+				user-select: none !important;
+				-webkit-user-select: none !important;
+			}
+
+			#property-panel {
+				background: rgba(0, 0, 0, 0.4);
+				overflow-x: hidden;
+				overflow-y: hidden;
+				width: 100%;
+				color: #fff;
+				font-weight: bold;
+			}
+
+			#property-panel .contents {
+				padding: 10px;
+			}
+
+			#levels {
+				height: 100%;
+			}
+
+			#levels > div {
+				height: 100%;
+				float: left;
+				overflow-y: auto;
+				pointer-events: auto;
+			}
+
+			#levels table {
+				border-collapse: separate;
+				border-spacing: 1px;
+			}
+
+			#levels td {
+				padding: 10px;
+				background: rgba(0, 0, 0, 0.4);
+				color: #fff;
+				font-weight: bold;
+			}
+
+			.toolbar {
+				pointer-events: auto;
+				overflow-y: auto;
+				overflow-x: hidden;
+			}
+
+			.toolbar .button {
+				text-align: center;
+				user-select: none;
+				-webkit-user-select: none !important;
+			}
+
+			.toolbar .button .text {
+				color: white;
+				font-weight: bold;
+				padding: 0 4px 5px 4px;
+			}
+
+			.toolbar table {
+				border-collapse: separate;
+				border-spacing: 1px;
+			}
+
+			.toolbar td {
+				cursor: pointer;
+				background: rgba(100, 100, 100, 0.9);
+				vertical-align: bottom;
+			}
+
+			.toolbar td.disabled {
+				cursor: auto;
+				display: block;
+				position: relative;
+			}
+
+			.toolbar td.disabled::before {
+				content: "";
+				display: block;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: rgba(200,200,200,0.6);
+			}
+
+			.toolbar td.green {
+				background: rgba(10, 90, 10, 0.7);
+			}
+
+			td.selected, #levels td.selected {
+				opacity: 0.9;
+				background-color: #00B7C4;
+			}
+
+			.toolbar td:hover {
+				opacity: 0.8;
+			}
+
+			#snackbar {
+				visibility: hidden;
+				min-width: 250px;
+				margin-left: -125px;
+				background-color: #333;
+				color: #fff;
+				text-align: center;
+				border-radius: 2px;
+				padding: 16px;
+				position: fixed;
+				z-index: 999;
+				left: 50%;
+				top: 30px;
+				font-size: 17px;
+				pointer-events: none;
+			}
+
+			#snackbar.show {
+				visibility: visible;
+				animation: fadein 0.5s;
+			}
+
+			@keyframes fadein {
+				from {top: 0; opacity: 0;}
+				to {top: 30px; opacity: 1;}
+			}
+
+			@keyframes fadeout {
+				from {top: 30px; opacity: 1;}
+				to {top: 0; opacity: 0;}
+			}
+
+			.gwt-PopupPanelGlass {
+				background: rgba(0, 0, 0, 0.5);
+			}
+
+			.gwt-DialogBox {
+				background: #eee;
+				border: 1px solid #ccc;
+			}
+
+			.gwt-DialogBox .Caption {
+				background: #fff;
+				padding: 10px;
+				border-bottom: 1px solid #ccc;
+				font-weight: bold;
+			}
+
+			.gwt-DialogBox .dialogContent {
+				padding: 10px;
+			}
+
+			.gwt-DialogBox .gwt-Button {
+				padding: 5px 10px;
+				background: #fff;
+				border: 1px solid #ccc;
+			}
+
+			.gwt-DialogBox .gwt-Button:hover {
+				background: #9fc3fc;
+			}
+
+			.gwt-DialogBox .buttons-right .gwt-Button {
+				margin: 10px 0 0 10px;
+			}
+
+			.gwt-DialogBox .buttons-left .gwt-Button {
+				margin: 10px 10px 0 0;
+			}
+
+			.gwt-SuggestBoxPopup {
+				z-index: 102;
+				background: #fff;
+			}
+
+			.gwt-SuggestBoxPopup .item {
+				padding: 5px;
+			}
+
+			.gwt-SuggestBoxPopup .item-selected {
+				background: #ddd;
+			}
+
+			.contents .gwt-Button {
+				padding: 5px 10px;
+				background: #eee;
+				border: 1px solid #666;
+				cursor: pointer;
+			}
+
+			.contents .gwt-Button:hover {
+				background: #9fc3fc;
+			}
+
+			.gwt-TextBox {
+				padding: 4px 9px;
+			}
+
+			.contents .margin {
+				margin-left: 10px;
+			}
+
+			.overlay {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				z-index: 200;
+			}
+
+			.colorpicker {
+				position: absolute;
+				bottom: 20px;
+				right: 20px;
+				z-index: 20;
+				box-shadow: 5px 5px 5px rgba(0, 0, 0, .5);
+				background: rgba(200, 200, 200, 0.8);
+				border: 1px solid #000;
+			}
+
+			.colorpicker-embed {
+				box-shadow: 2px 2px 2px rgba(0, 0, 0, .5);
+				border: 1px solid #000;
+			}
+
+			.colorpicker-embed td, .colorpicker td {
+				line-height: 0;
+			}
+
+			.colorpicker-embed td .iconbutton, .colorpicker td .iconbutton {
+				line-height: normal;
+			}
+
+			.colorpicker-embed input, .colorpicker input {
+				padding: 10px;
+				font-weight: bold;
+				border: none;
+				text-align: center;
+			}
+
+			.iconbutton {
+				background-color: #eee;
+				border: 1px solid #666;
+				margin: 5px;
+				padding: 5px 8px 5px 34px;
+				cursor: pointer;
+				background-repeat: no-repeat;
+				background-position: 5px center;
+			}
+
+			.iconbutton:hover {
+				background-color: #9fc3fc;
+			}
+
+			.formatbutton {
+				margin: 0 0 10px 0;
+				display: block;
+				text-align: left;
+				padding: 10px 8px 10px 48px;
+				border: 1px solid black;
+				cursor: pointer;
+				background-repeat: no-repeat;
+				background-position: 10px center;
+			}
+
+			.action {
+				width: 16px;
+				height: 16px;
+				margin-left: 8px;
+				cursor: pointer;
+			}
+
+			.props .category td {
+				cursor: pointer;
+				padding: 10px 10px 10px 0;
+			}
+
+			.props .category td.sel {
+				font-weight: bold;
+			}
+
+			.props .page {
+				border-collapse: collapse;
+			}
+
+			.props .page .row {
+				border-bottom: 1px solid #ccc;
+				padding: 10px 0 10px 10px;
+			}
+
+			.props .page .row .summary {
+				color: #888;
+				padding-top: 2px;
+			}
+
+			#progress {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				z-index: 9999;
+				display: none;
+			}
+
+			.loader,
+			.loader:after {
+				border-radius: 50%;
+				width: 10em;
+				height: 10em;
+			}
+			.loader {
+				margin: auto;
+				font-size: 10px;
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				text-indent: -9999em;
+				border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+				border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+				border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+				border-left: 1.1em solid #ffffff;
+				-webkit-transform: translateZ(0);
+				-ms-transform: translateZ(0);
+				transform: translateZ(0);
+				-webkit-animation: load8 1.1s infinite linear;
+				animation: load8 1.1s infinite linear;
+			}
+			@-webkit-keyframes load8 {
+				0% {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				100% {
+					-webkit-transform: rotate(360deg);
+					transform: rotate(360deg);
+				}
+			}
+			@keyframes load8 {
+				0% {
+					-webkit-transform: rotate(0deg);
+					transform: rotate(0deg);
+				}
+				100% {
+					-webkit-transform: rotate(360deg);
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+	</head>
+
+	<body style="margin: 0; overflow: hidden">
+		<noscript>
+			<div
+				style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+				Your web browser must have JavaScript enabled in order for this
+				application to display correctly.</div>
+		</noscript>
+
+				<div style="padding: 10px" id="printinfo">Please activate subscription plan to enable printing.</div>
+		
+		<div id="canvas" style="overflow: hidden; position: absolute; top: 36px; left: 0; right: 0; bottom: 0">
+		</div>
+
+		<div id="snackbar"></div>
+
+		<div id="ui" style="position: absolute; display: flex; flex-direction: column; width: 100%; height: 100%; pointer-events: none">
+						<div class="w3-bar w3-sand w3-card" style="line-height: 1.8; flex-shrink: 0; pointer-events: auto">
+				<a href="/gallery" class="w3-bar-item w3-button w3-wide logo">&nbsp;</a>
+				<span class="w3-bar-item" id="title"></span>
+				<div class="w3-right">
+					<button id="save" style="display: none" class="w3-bar-item w3-button"><i class="fa fa-floppy-o"></i> Save</button>
+				</div>
+			</div>
+			
+			<div style="flex-grow: 1; position: relative; font-size: 13px">
+				<div style="display: flex; flex-direction: row; position: absolute; top:0; right:0; bottom:0; left:0">
+					<div id="left" class="toolbar" style="pointer-events: auto; flex-grow: 0; flex-shrink: 0; overflow-y: auto; overflow-x: hidden"></div>
+					<div style="flex-grow: 1; position: relative">
+						<div style="display: flex; flex-direction: column; height: 100%">
+							<div id="property-panel" style="flex-grow: 0; flex-shrink: 0"></div>
+							<div style="flex-grow: 1; position: relative">
+								<div id="levels" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0"></div>
+							</div>
+						</div>
+					</div>
+					<div style="flex-grow: 0">
+						<div id="columnRight" style="display: flex; flex-direction: column; height: 100%">
+							<div id="symbolsSelect" style="flex-grow: 0"></div>
+							<div id="symbols" class="toolbar" style="flex-grow: 1; overflow-y: auto; pointer-events: auto"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="progress">
+			<div class="loader"></div>
+		</div>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway&display=swap">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	</body>
+</html>

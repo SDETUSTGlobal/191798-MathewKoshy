@@ -1,0 +1,90 @@
+
+*{
+padding: 0%;
+margin: 0%;
+}
+.header h1{
+    color: crimson;
+    font-size: 50px;
+    width: 60%;
+    background-color: lawngreen;
+    border: indianred;
+    
+}
+.header h1:hover
+{
+    background: fuchsia;
+}
+.header marquee{
+    color: brown;
+}
+.header
+{
+    min-height: 100vh;
+    width: 100%;
+    background-image: url(photo1.jpg);
+    backface-visibility:initial;
+    background-position: center;
+    background-size: cover;
+}
+nav
+{
+    padding: 1%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.navlinks
+{
+    
+    margin-left: 2%;
+    flex: 1;
+    text-align: left;
+    text-shadow: darkblue;
+    justify-content: space-between;
+    padding: 2px;
+    font-style: oblique;
+    font-size: 16px;
+    
+}
+.navlinks ul li
+{
+    color: crimson;
+    display:table;
+    list-style: none;
+    position: relative;
+   
+}
+.uni-head{
+    text-align: center;
+    padding: 2%;
+    margin-top: 10%;
+    font-family: monospace;
+    color: white;
+    background: rgb(19, 18, 18);
+}
+.ab{
+    min-height: 100ex;
+    width: 100%;
+    padding: 4%;
+    color: white;
+    background-image: url(cambridge-university.png) ;
+}
+.ab h2{
+    margin-bottom: 10px;
+    font-size: 30px;
+    color: crimson;
+    text-decoration: none;
+
+}
+.header button {
+    border: none;
+    color: rgb(248, 2, 2);
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
